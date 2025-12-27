@@ -10,7 +10,7 @@ export async function POST(request) {
     // จำลองการยิงไป BEAM (คุณต้องเช็ค Doc ของ BEAM ว่า Endpoint คืออะไร)
     // นี่คือตัวอย่างสมมติ Standard
     const beamResponse = await axios.post(
-      'https://api.beamdata.co/v1/checkout', // เช็ค URL จริงใน Docs BEAM
+      'https://playground.api.beamcheckout.com ', // เช็ค URL จริงใน Docs BEAM
       {
         order_id: orderId,
         amount: amount,
