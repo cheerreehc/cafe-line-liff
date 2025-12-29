@@ -212,6 +212,7 @@ export default function Home() {
   const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   const handlePayment = async () => {
+    // 1. Validation (เหมือนเดิม)
     if (cart.length === 0) return;
     
     let finalPickupTime = 'รอแจ้งเตือน';
@@ -219,7 +220,6 @@ export default function Home() {
         if (!pickupTime) return alert('กรุณาระบุเวลารับสินค้า');
         finalPickupTime = `${pickupDate} เวลา ${pickupTime}`;
     } else {
-        // เช็คเวลาร้านเปิดสำหรับ "รับทันที" ด้วย (เผื่อกดตอนตี 2)
         const now = new Date();
         const currentHour = now.getHours();
         if (currentHour < 8 || currentHour >= 17) {
@@ -231,6 +231,8 @@ export default function Home() {
     setLoading(true);
     try {
       const orderId = `ORD-${Date.now()}`;
+      
+      // 2. ยิงไป Backend
       const res = await axios.post('/api/checkout', {
         amount: total,
         orderId: orderId,
@@ -242,9 +244,17 @@ export default function Home() {
         }
       });
 
-      if (res.data.url) liff.openWindow({ url: res.data.url, external: false });
+      // 3. ตรวจสอบผลลัพธ์และ Redirect
+      if (res.status === 200 && res.data.url) {
+          // --- จุดที่แก้ไข: สั่งให้ Browser เปลี่ยนหน้าไปที่ URL ของ Beam ---
+          window.location.href = res.data.url; 
+      } else {
+          alert('ไม่ได้รับลิ้งค์ชำระเงินจากระบบ');
+      }
+
     } catch (error) {
-      alert('เกิดข้อผิดพลาดในการเชื่อมต่อระบบชำระเงิน');
+      console.error("Payment Error:", error);
+      alert('เกิดข้อผิดพลาด: ' + (error.response?.data?.error || error.message));
     }
     setLoading(false);
   };
