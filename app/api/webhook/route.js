@@ -61,6 +61,12 @@ export async function POST(request) {
 // ฟังก์ชันส่งไลน์ (เหมือนเดิม)
 async function sendLineNotification(order) {
     const LINE_ACCESS_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN; 
+
+    // เช็ค User ID ก่อนเลย
+    if (!order.customer_id || order.customer_id === 'guest') {
+        console.log('⚠️ LINE Skipped: Customer is GUEST (No User ID)');
+        return;
+    }
     
     if (!LINE_ACCESS_TOKEN) {
         console.log('⚠️ No LINE Token found, skipping notification.');
