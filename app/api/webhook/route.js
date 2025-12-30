@@ -4,71 +4,91 @@ import axios from 'axios';
 
 export async function POST(request) {
   try {
+    // 1. อ่านข้อมูลที่ส่งมา
     const rawBody = await request.text();
     const body = JSON.parse(rawBody);
     const eventType = request.headers.get('x-beam-event');
 
+    // --- LOG เริ่มต้น: ตรวจสอบว่า Beam ส่งอะไรมา ---
+    console.log('🔔 WEBHOOK RECEIVED!');
+    console.log('Event Type:', eventType);
+    console.log('Status:', body.status);
+    console.log('Ref ID:', body.order?.referenceId || body.referenceId);
+    // ---------------------------------------------
+
+    // เช็คเงื่อนไข: ต้องเป็นอีเวนต์จ่ายเงินสำเร็จ
     if (eventType === 'payment_link.paid' && body.status === 'PAID') {
         const orderId = body.order?.referenceId || body.referenceId;
         
-        console.log(`✅ Paid Order: ${orderId}`);
+        console.log(`🔍 Searching Order ID: ${orderId} in Database...`);
         
-        // 1. อัปเดตสถานะเป็น 'paid'
+        // 2. พยายามอัปเดต Database
         const { data: orderData, error } = await supabase
             .from('orders')
-            .update({ payment_status: 'paid', status: 'preparing' }) // เปลี่ยนสถานะเป็นกำลังเตรียม
+            .update({ payment_status: 'paid', status: 'preparing' })
             .eq('order_id', orderId)
-            .select()
+            .select() // สำคัญ! ต้องมี select ถึงจะ return ข้อมูลกลับมาเช็คได้
             .single();
 
-        if (orderData) {
-            // 2. ส่ง LINE แจ้งเตือน (ฟังก์ชันแยก)
-            await sendLineNotification(orderData);
+        // --- LOG จุดวัดใจ: บันทึกได้ไหม? ---
+        if (error) {
+            console.error('🔴 UPDATE FAILED:', JSON.stringify(error, null, 2));
+            // สันนิษฐานว่าติด RLS หรือหา ID ไม่เจอ
+        } else if (!orderData) {
+            console.error('🔴 ORDER NOT FOUND: อัปเดตสำเร็จแต่ไม่เจอข้อมูล (ID ผิด?)');
+        } else {
+            console.log('✅ UPDATE SUCCESS! Order is now PAID.');
+            
+            // 3. ส่ง LINE แจ้งเตือน
+            try {
+                await sendLineNotification(orderData);
+                console.log('✅ LINE Sent');
+            } catch (err) {
+                console.error('🔴 LINE Error:', err.message);
+            }
         }
+    } else {
+        console.log('⚠️ Event skipped (Not a PAID event)');
     }
 
     return NextResponse.json({ status: 'ok' });
   } catch (error) {
-    console.error('Webhook Error:', error);
-    return NextResponse.json({ error: 'Error' }, { status: 500 });
+    console.error('🔥 CRITICAL ERROR:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
-// ฟังก์ชันส่งไลน์
+// ฟังก์ชันส่งไลน์ (เหมือนเดิม)
 async function sendLineNotification(order) {
-    const LINE_ACCESS_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN; // ใส่ใน .env
+    const LINE_ACCESS_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN; 
     
-    // สร้างข้อความสรุปรายการ
-    const itemsList = order.items.map(item => 
-        `- ${item.name} x${item.quantity} (${item.options?.sweetness || ''})`
-    ).join('\n');
+    if (!LINE_ACCESS_TOKEN) {
+        console.log('⚠️ No LINE Token found, skipping notification.');
+        return;
+    }
+
+    const itemsList = Array.isArray(order.items) 
+        ? order.items.map(item => `- ${item.name} x${item.quantity}`).join('\n')
+        : 'รายการอาหารดูในระบบ';
 
     const message = {
         type: 'flex',
-        altText: `มีออเดอร์ใหม่! ${order.order_id}`,
+        altText: `New Order: ${order.order_id}`,
         contents: {
             type: 'bubble',
-            header: {
-                type: 'box', layout: 'vertical', backgroundColor: '#06c755',
-                contents: [
-                    { type: 'text', text: '📝 ออเดอร์ใหม่ (จ่ายแล้ว)', weight: 'bold', color: '#ffffff', size: 'lg' }
-                ]
-            },
             body: {
                 type: 'box', layout: 'vertical',
                 contents: [
-                    { type: 'text', text: `Order ID: ${order.order_id}`, size: 'xs', color: '#aaaaaa' },
-                    { type: 'separator', margin: 'md' },
+                    { type: 'text', text: '✅ ชำระเงินแล้ว', weight: 'bold', color: '#1DB446' },
+                    { type: 'text', text: `Order: ${order.order_id}`, size: 'sm' },
                     { type: 'text', text: itemsList, wrap: true, margin: 'md' },
-                    { type: 'separator', margin: 'md' },
-                    { type: 'text', text: `รวม: ${order.total_price} บาท`, weight: 'bold', align: 'end', margin: 'md' }
+                    { type: 'text', text: `${order.total_price} บาท`, align: 'end', weight: 'bold' }
                 ]
             }
         }
     };
 
-    // A. แจ้งลูกค้า (Push Message)
-    if (order.customer_id) {
+    if (order.customer_id && order.customer_id !== 'guest') {
         await axios.post('https://api.line.me/v2/bot/message/push', {
             to: order.customer_id,
             messages: [message]
@@ -76,7 +96,4 @@ async function sendLineNotification(order) {
             headers: { 'Authorization': `Bearer ${LINE_ACCESS_TOKEN}` }
         });
     }
-
-    // B. แจ้งร้านค้า (แนะนำใช้ LINE Notify แยกต่างหาก หรือ Push หา Admin ID)
-    // หรือถ้า Admin อยู่ในกลุ่มเดียวกับ Bot ก็ยิงเข้า Group ID ได้เลย
 }
