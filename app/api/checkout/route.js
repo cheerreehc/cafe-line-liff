@@ -60,7 +60,7 @@ export async function POST(request) {
             referenceId: orderId,
             description: `Order ${orderId}`, 
         },
-        redirectUrl: 'https://cafe-line-liff-git-new-feature-testing-cheers-projects-ff063d3c.vercel.app/order-history' 
+        redirectUrl: `${request.headers.get('origin')}/success`
     };
 
     console.log(`Creating Link with Merchant ID: ${MERCHANT_ID}`);
