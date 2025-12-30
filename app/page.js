@@ -10,7 +10,7 @@ export default function Home() {
   const [profile, setProfile] = useState(null);
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
-  
+
   
   // --- STATE หน้าจอ ---
   const [categories, setCategories] = useState(["ทั้งหมด"]);
@@ -238,6 +238,7 @@ export default function Home() {
         amount: total,
         orderId: orderId,
         items: cart,
+        userId: profile?.userId,// ✅ [เพิ่มบรรทัดนี้] ส่ง User ID ที่ได้จาก LIFF Profile ไปด้วย
         delivery: {
             method: deliveryMethod,
             type: pickupType,
