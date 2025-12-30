@@ -10,13 +10,13 @@ export async function POST(request) {
     console.log(`--- Processing Order: ${orderId} ---`);
 
     // ---------------------------------------------------------
-    // 1. บันทึกออเดอร์ลง Supabase (ส่วนที่หายไป ผมเติมให้แล้วครับ)
+    // 1. บันทึกออเดอร์ลง Supabase
     // ---------------------------------------------------------
     const { error: saveError } = await supabase
         .from('orders')
         .insert({
             order_id: orderId,    
-            customer_id: userId || 'guest', // กันเหนียวเผื่อไม่มี userId
+            customer_id: userId || 'guest', 
             items: items,
             total_price: amount,
             status: 'pending',
@@ -25,7 +25,6 @@ export async function POST(request) {
 
     if (saveError) {
         console.error('🔴 DB SAVE ERROR:', JSON.stringify(saveError, null, 2));
-        // ถ้าบันทึกไม่สำเร็จ ให้หยุดทันที ไม่ต้องสร้าง QR (จะได้รู้ตัว)
         return NextResponse.json({ error: 'Database Error: ' + saveError.message }, { status: 500 });
     }
     console.log('✅ Order saved to Database');
@@ -34,7 +33,6 @@ export async function POST(request) {
     // 2. เตรียมสร้าง Payment Link (Beam)
     // ---------------------------------------------------------
     
-    // ดึงค่าจาก Environment (Dev หรือ Prod)
     const BEAM_URL = process.env.BEAM_API_URL;
     const MERCHANT_ID = process.env.BEAM_MERCHANT_ID;
     const API_KEY = process.env.BEAM_API_KEY;
@@ -47,9 +45,13 @@ export async function POST(request) {
         collectDeliveryAddress: false,
         collectPhoneNumber: false,     
         linkSettings: {
+            // ✅ เปิดแค่ QR Code อย่างเดียว
             qrPromptPay: { isEnabled: true },
-            // เปิดบัตรเฉพาะ Production (ถ้าต้องการ)
-            card: { isEnabled: process.env.NODE_ENV === 'production' }, 
+            
+            // ❌ ปิดบัตรเครดิตถาวร (จะได้ไม่ติด Error Playground)
+            card: { isEnabled: false }, 
+            
+            // ❌ ปิด Mobile Banking
             mobileBanking: { isEnabled: false }
         },
         order: {
