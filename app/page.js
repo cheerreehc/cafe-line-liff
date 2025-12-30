@@ -11,6 +11,7 @@ export default function Home() {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
   
+  
   // --- STATE หน้าจอ ---
   const [categories, setCategories] = useState(["ทั้งหมด"]);
   const [selectedCategory, setSelectedCategory] = useState("ทั้งหมด");
