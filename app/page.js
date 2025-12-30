@@ -37,33 +37,17 @@ export default function Home() {
     const [debugLog, setDebugLog] = useState("");
 
   // 1. ดึงเมนู
-//   useEffect(() => {
-//     const fetchMenu = async () => {
-//       const { data } = await supabase.from('menu').select('*').order('id');
-//       if (data) {
-//         setMenu(data);
-//         const uniqueCategories = ["ทั้งหมด", ...new Set(data.map(m => m.category || "อื่นๆ"))];
-//         setCategories(uniqueCategories);
-//       }
-//     };
-//     fetchMenu();
-//   }, []);
-
-// แก้ฟังก์ชัน fetchMenu ให้เป็นแบบนี้
-const fetchMenu = async () => {
-  try {
-    const { data, error } = await supabase.from('menu').select('*').order('id');
-    if (error) {
-        setDebugLog("DB Error: " + JSON.stringify(error));
-    } else if (data) {
+  useEffect(() => {
+    const fetchMenu = async () => {
+      const { data } = await supabase.from('menu').select('*').order('id');
+      if (data) {
         setMenu(data);
         const uniqueCategories = ["ทั้งหมด", ...new Set(data.map(m => m.category || "อื่นๆ"))];
         setCategories(uniqueCategories);
-    }
-  } catch (err) {
-    setDebugLog("Fetch Crash: " + err.message);
-  }
-};
+      }
+    };
+    fetchMenu();
+  }, []);
 
   // 2. LIFF Init
   useEffect(() => {
@@ -472,12 +456,12 @@ const fetchMenu = async () => {
                 <div style={{width: '100px', height: '100px', borderRadius: '10px', overflow: 'hidden', flexShrink: 0, background: '#eee', position:'relative'}}>
 
                     {/* --- ส่วนดีบัก (แสดงเฉพาะตอนมีปัญหา) --- */}
-                    {debugLog && (
-                        <div style={{background:'red', color:'white', padding:10, marginBottom:20, borderRadius:8}}>
-                            <b>⚠️ พบข้อผิดพลาด:</b> <br/>
-                            {debugLog}
-                        </div>
-                    )}
+                {debugLog && (
+                    <div style={{background:'red', color:'white', padding:10, marginBottom:20, borderRadius:8}}>
+                        <b>⚠️ พบข้อผิดพลาด:</b> <br/>
+                        {debugLog}
+                    </div>
+                )}
 
                     <img src={item.image_url || 'https://placehold.co/200x200?text=No+Image'} style={{width:'100%', height:'100%', objectFit:'cover'}} />
                     
