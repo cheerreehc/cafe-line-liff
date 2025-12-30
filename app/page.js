@@ -33,18 +33,37 @@ export default function Home() {
   const [pickupTime, setPickupTime] = useState(''); 
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]); // <--- NEW: เก็บ Slot เวลา
 
+  // เพิ่มบรรทัดนี้ตรงที่ประกาศตัวแปรเยอะๆ
+    const [debugLog, setDebugLog] = useState("");
+
   // 1. ดึงเมนู
-  useEffect(() => {
-    const fetchMenu = async () => {
-      const { data } = await supabase.from('menu').select('*').order('id');
-      if (data) {
+//   useEffect(() => {
+//     const fetchMenu = async () => {
+//       const { data } = await supabase.from('menu').select('*').order('id');
+//       if (data) {
+//         setMenu(data);
+//         const uniqueCategories = ["ทั้งหมด", ...new Set(data.map(m => m.category || "อื่นๆ"))];
+//         setCategories(uniqueCategories);
+//       }
+//     };
+//     fetchMenu();
+//   }, []);
+
+// แก้ฟังก์ชัน fetchMenu ให้เป็นแบบนี้
+const fetchMenu = async () => {
+  try {
+    const { data, error } = await supabase.from('menu').select('*').order('id');
+    if (error) {
+        setDebugLog("DB Error: " + JSON.stringify(error));
+    } else if (data) {
         setMenu(data);
         const uniqueCategories = ["ทั้งหมด", ...new Set(data.map(m => m.category || "อื่นๆ"))];
         setCategories(uniqueCategories);
-      }
-    };
-    fetchMenu();
-  }, []);
+    }
+  } catch (err) {
+    setDebugLog("Fetch Crash: " + err.message);
+  }
+};
 
   // 2. LIFF Init
   useEffect(() => {
@@ -445,10 +464,21 @@ export default function Home() {
           const countInCart = getItemCountInCart(item.id);
           
           return (
+
+
             <div key={item.id} style={{ background:'white', padding: 10, borderRadius: 15, display: 'flex', gap: 15, boxShadow: '0 2px 8px rgba(0,0,0,0.05)', position:'relative' }}>
                 
                 {/* รูปภาพเมนู + Badge จำนวนที่สั่งแล้ว */}
                 <div style={{width: '100px', height: '100px', borderRadius: '10px', overflow: 'hidden', flexShrink: 0, background: '#eee', position:'relative'}}>
+
+                    {/* --- ส่วนดีบัก (แสดงเฉพาะตอนมีปัญหา) --- */}
+                    {debugLog && (
+                        <div style={{background:'red', color:'white', padding:10, marginBottom:20, borderRadius:8}}>
+                            <b>⚠️ พบข้อผิดพลาด:</b> <br/>
+                            {debugLog}
+                        </div>
+                    )}
+
                     <img src={item.image_url || 'https://placehold.co/200x200?text=No+Image'} style={{width:'100%', height:'100%', objectFit:'cover'}} />
                     
                     {/* Badge แสดงจำนวน */}
@@ -476,6 +506,7 @@ export default function Home() {
                 </div>
                 </div>
             </div>
+            
           );
         })}
       </div>
