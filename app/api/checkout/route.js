@@ -51,9 +51,23 @@ export async function POST(request) {
         collectDeliveryAddress: false,
         collectPhoneNumber: false,     
         linkSettings: {
+            // 1. สแกนจ่าย (QR PromptPay)
             qrPromptPay: { isEnabled: true },
-            card: { isEnabled: false }, 
-            mobileBanking: { isEnabled: false }
+            
+            // 2. บัตรเครดิต/เดบิต (Credit Card)
+            card: { isEnabled: true }, 
+            
+            // 3. แอปธนาคาร (KPlus, SCB Easy, etc.)
+            mobileBanking: { isEnabled: true },
+
+            // 4. ผ่อนชำระ (Installment) - ⭐ สำคัญมากสำหรับขายรูปภาพ
+            installment: { isEnabled: true },
+
+            // 5. กระเป๋าเงินออนไลน์ (TrueMoney, ShopeePay)
+            eWallet: { isEnabled: true }
+            
+            // ❌ ไม่ใส่ buyNowPayLater เพื่อปิดการใช้งาน
+            // buyNowPayLater: { isEnabled: false } 
         },
         order: {
             netAmount: Math.round(amount * 100), 

@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import liff from '@line/liff';
 import axios from 'axios';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../../lib/supabase';
 
 export default function Home() {
   // --- STATE ข้อมูลหลัก ---
@@ -354,14 +354,14 @@ export default function Home() {
               </div>
           </div>
 
-          <div style={{background:'white', padding: 15, borderRadius: 12, marginBottom: 15}}>
+          {/* <div style={{background:'white', padding: 15, borderRadius: 12, marginBottom: 15}}>
               <h3 style={{marginTop:0, fontSize:'16px'}}>ชำระเงิน</h3>
               <label style={{display:'flex', alignItems:'center', gap: 10, padding: 10, border:'1px solid #06c755', borderRadius: 8, background:'#e8f8ee'}}>
                   <img src="https://upload.wikimedia.org/wikipedia/commons/c/c5/PromptPay-logo.png" style={{height: 20}} alt="PromptPay"/>
                   <div style={{fontWeight:'bold'}}>PromptPay (สแกนจ่าย)</div>
                   <div style={{marginLeft:'auto', color:'#06c755'}}>✓</div>
               </label>
-          </div>
+          </div> */}
 
           <div style={{position:'fixed', bottom:0, left:0, right:0, background:'white', borderTop:'1px solid #eee', padding: 20, boxShadow:'0 -5px 10px rgba(0,0,0,0.05)'}}>
               <div style={{display:'flex', justifyContent:'space-between', marginBottom: 10}}>
