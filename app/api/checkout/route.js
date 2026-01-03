@@ -1,16 +1,21 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
-import { supabase } from '../../../lib/supabase'; // ตรวจสอบ path ให้ถูก
+import { supabase } from '../../../lib/supabase';
 
 export async function POST(request) {
   try {
     const body = await request.json();
     const { amount, orderId, items, userId } = body;
+    const shopId = process.env.NEXT_PUBLIC_SHOP_ID; // 👈 1. ดึง Shop ID
 
-    console.log(`--- Processing Order: ${orderId} ---`);
+    if (!shopId) {
+        throw new Error("Missing NEXT_PUBLIC_SHOP_ID configuration");
+    }
+
+    console.log(`--- Processing Order: ${orderId} for Shop: ${shopId} ---`);
 
     // ---------------------------------------------------------
-    // 1. บันทึกออเดอร์ลง Supabase
+    // 1. บันทึกออเดอร์ลง Supabase (พร้อม Shop ID)
     // ---------------------------------------------------------
     const { error: saveError } = await supabase
         .from('orders')
@@ -20,7 +25,8 @@ export async function POST(request) {
             items: items,
             total_price: amount,
             status: 'pending',
-            payment_status: 'pending'
+            payment_status: 'pending',
+            shop_id: shopId // 👈 2. ใส่ Shop ID ลงไป
         });
 
     if (saveError) {
@@ -45,13 +51,8 @@ export async function POST(request) {
         collectDeliveryAddress: false,
         collectPhoneNumber: false,     
         linkSettings: {
-            // ✅ เปิดแค่ QR Code อย่างเดียว
             qrPromptPay: { isEnabled: true },
-            
-            // ❌ ปิดบัตรเครดิตถาวร (จะได้ไม่ติด Error Playground)
             card: { isEnabled: false }, 
-            
-            // ❌ ปิด Mobile Banking
             mobileBanking: { isEnabled: false }
         },
         order: {
