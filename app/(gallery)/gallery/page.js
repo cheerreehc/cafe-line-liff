@@ -14,7 +14,6 @@ export default function GalleryHome() {
 
   const fetchArtworks = async () => {
     const shopId = process.env.NEXT_PUBLIC_SHOP_ID;
-    
     const { data, error } = await supabase
       .from('artworks')
       .select('*')
@@ -25,20 +24,21 @@ export default function GalleryHome() {
     setLoading(false);
   };
 
-  if (loading) return <div style={{textAlign:'center', padding:50, color:'white', fontFamily:'serif'}}>Loading Gallery...</div>;
+  if (loading) return <div style={{textAlign:'center', padding:50, color:'#999', fontFamily:'serif'}}>Loading Gallery...</div>;
 
   return (
     <div style={{ padding: '20px', paddingBottom: '100px', maxWidth: '600px', margin: '0 auto' }}>
       
-      {/* --- HEADER SECTION (Final Version) --- */}
+      {/* --- HEADER SECTION --- */}
       <div style={{ textAlign: 'center', marginBottom: '30px', marginTop: '20px' }}>
         
         {/* Logo */}
         <div style={{ 
             width: 70, height: 70, margin: '0 auto 15px', 
             borderRadius: '50%', overflow: 'hidden', 
-            border: '2px solid #333', 
-            background: '#000' 
+            border: '1px solid #eee', // ขอบสีอ่อน
+            background: '#fff',
+            boxShadow: '0 4px 10px rgba(0,0,0,0.05)'
         }}>
             <img 
                 src="/logo.png" 
@@ -48,49 +48,43 @@ export default function GalleryHome() {
             />
         </div>
 
-        <h1 style={{ fontFamily: '"Times New Roman", serif', fontSize: '28px', marginBottom: '5px', letterSpacing: '1px', fontWeight: 'normal', color: 'white' }}>
+        <h1 style={{ fontFamily: '"Times New Roman", serif', fontSize: '28px', marginBottom: '5px', letterSpacing: '1px', fontWeight: 'normal', color: '#000000' }}>
             BaanSilpa Gallery
         </h1>
         
-        {/* ✅ เอา Slogan กลับมา */}
-        <p style={{ color: '#888', fontSize: '12px', fontFamily: 'serif', fontStyle: 'italic', marginBottom: '20px', letterSpacing: '0.5px' }}>
+        <p style={{ color: '#666', fontSize: '12px', fontFamily: 'serif', fontStyle: 'italic', marginBottom: '20px', letterSpacing: '0.5px' }}>
             Curated Digital Art Space & Collector's Hub
         </p>
 
-        {/* ✅ Features บรรทัดเดียว (Flexbox) */}
+        {/* Features Capsule (Light Theme) */}
         <div style={{ 
-            display: 'flex', 
+            display: 'inline-flex', 
             justifyContent: 'center', 
             alignItems: 'center', 
             gap: '15px', 
-            flexWrap: 'wrap', // เผื่อจอมือถือเล็กมากๆ ให้ปัดลงมาได้ไม่พัง
+            flexWrap: 'wrap', 
             fontSize: '11px', 
-            color: '#bbb',
-            background: 'rgba(255,255,255,0.05)',
-            padding: '8px 15px',
-            borderRadius: '20px', // ทำเป็นแคปซูลยาวๆ
-            border: '1px solid #222',
-            display: 'inline-flex' // ให้ความกว้างหดเท่าเนื้อหา
+            color: '#555', // ตัวหนังสือสีเข้มขึ้น
+            background: '#f9f9f9', // พื้นหลังเทาอ่อนมากๆ
+            padding: '8px 20px',
+            borderRadius: '20px',
+            border: '1px solid #eee'
         }}>
             <div style={{display:'flex', alignItems:'center', gap: 4}}>
                  <span style={{color:'#d4b106'}}>✓</span> การันตีของแท้
             </div>
-
-            <div style={{width: 1, height: 10, background: '#444'}}></div> {/* เส้นคั่น */}
-
+            <div style={{width: 1, height: 10, background: '#ddd'}}></div> 
             <div style={{display:'flex', alignItems:'center', gap: 4}}>
                  <span style={{color:'#d4b106'}}>💬</span> คุยกับศิลปิน
             </div>
-
-            <div style={{width: 1, height: 10, background: '#444'}}></div> {/* เส้นคั่น */}
-
+            <div style={{width: 1, height: 10, background: '#ddd'}}></div> 
             <div style={{display:'flex', alignItems:'center', gap: 4}}>
-                 <span style={{color:'#d4b106'}}>💳</span> จ่ายผ่านบัตรได้
+                 <span style={{color:'#d4b106'}}>💳</span> รับชำระผ่านบัตร
             </div>
         </div>
       </div>
 
-      {/* --- MASONRY GRID --- */}
+      {/* --- MASONRY GRID (Light Theme) --- */}
       <div style={{ columnCount: 2, columnGap: '20px' }}>
         {artworks.map((art, index) => (
             <div 
@@ -98,31 +92,30 @@ export default function GalleryHome() {
                 onClick={() => router.push(`/gallery/${art.id}`)}
                 style={{ 
                     cursor: 'pointer', 
-                    borderRadius: '2px',
+                    borderRadius: '4px',
                     overflow: 'hidden', 
                     breakInside: 'avoid', 
                     marginBottom: '20px',
-                    background: 'radial-gradient(circle at 50% 30%, #2a2a2a 0%, #000000 80%)',
-                    boxShadow: '0 10px 30px -10px rgba(255,255,255,0.05)',
+                    
+                    // ✅ Light Theme Card Styling
+                    background: '#ffffff',
+                    border: '1px solid #f0f0f0', // เส้นขอบบางๆ
+                    boxShadow: '0 5px 20px rgba(0,0,0,0.03)', // เงาจางๆ แบบผู้ดี
+                    
                     transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                     animationDelay: `${index * 0.1}s`
                 }}
                 className="gallery-item-enter"
                 onMouseOver={(e) => {
                     e.currentTarget.style.transform = 'translateY(-5px)';
-                    e.currentTarget.style.boxShadow = '0 15px 40px -10px rgba(255,255,255,0.15)';
+                    e.currentTarget.style.boxShadow = '0 15px 30px rgba(0,0,0,0.08)';
                 }}
                 onMouseOut={(e) => {
                     e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 10px 30px -10px rgba(255,255,255,0.05)';
+                    e.currentTarget.style.boxShadow = '0 5px 20px rgba(0,0,0,0.03)';
                 }}
             >
                 <div style={{ width: '100%', position: 'relative' }}>
-                    <div style={{
-                        position:'absolute', inset:0, 
-                        background:'radial-gradient(circle, transparent 60%, rgba(0,0,0,0.5) 100%)', 
-                        zIndex:1, pointerEvents:'none'
-                    }}></div>
                     <img 
                         src={art.image_url} 
                         style={{ width: '100%', height: 'auto', display: 'block' }} 
@@ -130,14 +123,14 @@ export default function GalleryHome() {
                     />
                 </div>
                 
-                <div style={{ padding: '20px 15px', textAlign:'center' }}>
-                    <h3 style={{ fontFamily: '"Times New Roman", serif', fontSize: '16px', margin: '0 0 8px', color: '#eee', fontWeight:'normal', letterSpacing:'0.5px' }}>
+                <div style={{ padding: '15px', textAlign:'center' }}>
+                    <h3 style={{ fontFamily: '"Times New Roman", serif', fontSize: '15px', margin: '0 0 5px', color: '#111', fontWeight:'normal' }}>
                         {art.title}
                     </h3>
-                    <p style={{ fontSize: '12px', color: '#888', margin: 0, fontStyle:'italic' }}>
+                    <p style={{ fontSize: '11px', color: '#888', margin: 0, fontStyle:'italic' }}>
                         by {art.artist_name}
                     </p>
-                    <div style={{ marginTop: '15px', color: '#d4b106', fontSize:'14px', fontFamily:'sans-serif' }}>
+                    <div style={{ marginTop: '12px', color: '#d4b106', fontSize:'13px', fontFamily:'sans-serif', fontWeight:'500' }}>
                         {art.price.toLocaleString()} THB
                     </div>
                 </div>
@@ -146,7 +139,7 @@ export default function GalleryHome() {
       </div>
 
       {!loading && artworks.length === 0 && (
-          <div style={{ textAlign: 'center', color: '#666', marginTop: 80, fontFamily: 'serif' }}>
+          <div style={{ textAlign: 'center', color: '#999', marginTop: 80, fontFamily: 'serif' }}>
               Currently, there are no artworks on display.
           </div>
       )}

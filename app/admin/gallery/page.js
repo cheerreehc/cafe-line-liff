@@ -12,14 +12,16 @@ export default function GalleryManager() {
   const [editId, setEditId] = useState(null);
   const [uploading, setUploading] = useState(false);
 
-  // ✅ เพิ่ม field: dimensions, artist_image_url
+  // ✅ เพิ่ม field: location, artist_social_url
   const [newItem, setNewItem] = useState({
     title: '',
     artist_name: '',
-    artist_image_url: '', // รูปศิลปิน
+    artist_image_url: '',
+    artist_social_url: '', // ✅ ลิงก์ Social Media
     price: '',
     technique: '',
-    dimensions: '', // ขนาดภาพ
+    dimensions: '',
+    location: 'โซนคาเฟ่ Indoor อาคารหลัก', // ✅ ค่า Default
     concept: '',
     image_url: '',
     is_installment_available: false,
@@ -57,16 +59,14 @@ export default function GalleryManager() {
     setLoading(false);
   };
 
-  // ✅ ฟังก์ชันอัปโหลด (ปรับให้รับ parameter ว่าจะอัปโหลดลงช่องไหน)
   const handleImageUpload = async (e, fieldName) => {
     try {
       setUploading(true);
-      
       if (!e.target.files || e.target.files.length === 0) return;
 
       const file = e.target.files[0];
       const fileExt = file.name.split('.').pop();
-      const fileName = `${fieldName}-${Date.now()}.${fileExt}`; // ตั้งชื่อให้รู้ว่าเป็นรูปอะไร
+      const fileName = `${fieldName}-${Date.now()}.${fileExt}`;
       const filePath = `${fileName}`;
 
       const { error: uploadError } = await supabase.storage
@@ -75,11 +75,7 @@ export default function GalleryManager() {
 
       if (uploadError) throw uploadError;
 
-      const { data } = supabase.storage
-        .from('artworks')
-        .getPublicUrl(filePath);
-
-      // อัปเดตลง State ตามชื่อ field ที่ส่งมา
+      const { data } = supabase.storage.from('artworks').getPublicUrl(filePath);
       setNewItem(prev => ({ ...prev, [fieldName]: data.publicUrl }));
       
     } catch (error) {
@@ -96,10 +92,12 @@ export default function GalleryManager() {
     const payload = {
         title: newItem.title,
         artist_name: newItem.artist_name,
-        artist_image_url: newItem.artist_image_url, // ✅
+        artist_image_url: newItem.artist_image_url,
+        artist_social_url: newItem.artist_social_url, // ✅
         price: parseInt(newItem.price),
         technique: newItem.technique,
-        dimensions: newItem.dimensions, // ✅
+        dimensions: newItem.dimensions,
+        location: newItem.location, // ✅
         concept: newItem.concept,
         image_url: newItem.image_url,
         is_installment_available: newItem.is_installment_available,
@@ -107,31 +105,13 @@ export default function GalleryManager() {
     };
 
     if (isEditing) {
-        const { error } = await supabase
-            .from('artworks')
-            .update(payload)
-            .eq('id', editId)
-            .eq('shop_id', shopId);
-
+        const { error } = await supabase.from('artworks').update(payload).eq('id', editId).eq('shop_id', shopId);
         if (error) alert('แก้ไขไม่สำเร็จ: ' + error.message);
-        else {
-            alert('✅ แก้ไขเรียบร้อย!');
-            resetForm();
-            fetchArtworks(shopId);
-        }
+        else { alert('✅ แก้ไขเรียบร้อย!'); resetForm(); fetchArtworks(shopId); }
     } else {
-        const { error } = await supabase.from('artworks').insert([{
-            ...payload,
-            shop_id: shopId,
-            status: 'available'
-        }]);
-
+        const { error } = await supabase.from('artworks').insert([{ ...payload, shop_id: shopId, status: 'available' }]);
         if (error) alert('Error: ' + error.message);
-        else {
-            alert('✅ ลงทะเบียนเรียบร้อย!');
-            resetForm();
-            fetchArtworks(shopId);
-        }
+        else { alert('✅ ลงทะเบียนเรียบร้อย!'); resetForm(); fetchArtworks(shopId); }
     }
   };
 
@@ -141,10 +121,12 @@ export default function GalleryManager() {
     setNewItem({
         title: art.title,
         artist_name: art.artist_name,
-        artist_image_url: art.artist_image_url || '', // ✅
+        artist_image_url: art.artist_image_url || '',
+        artist_social_url: art.artist_social_url || '', // ✅
         price: art.price,
         technique: art.technique,
-        dimensions: art.dimensions || '', // ✅
+        dimensions: art.dimensions || '',
+        location: art.location || 'โซนคาเฟ่ Indoor อาคารหลัก', // ✅
         concept: art.concept,
         image_url: art.image_url,
         is_installment_available: art.is_installment_available,
@@ -157,15 +139,14 @@ export default function GalleryManager() {
     setIsEditing(false);
     setEditId(null);
     setNewItem({ 
-        title: '', artist_name: '', artist_image_url: '', 
-        price: '', technique: '', dimensions: '', 
+        title: '', artist_name: '', artist_image_url: '', artist_social_url: '',
+        price: '', technique: '', dimensions: '', location: 'โซนคาเฟ่ Indoor อาคารหลัก',
         concept: '', image_url: '', is_installment_available: false, status: 'available' 
     });
   };
 
   return (
     <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', fontFamily: 'sans-serif' }}>
-      {/* ... Header เดิม ... */}
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: 20 }}>
           <h1>🎨 จัดการ Art Gallery</h1>
           <button onClick={() => router.push('/admin')} style={{ padding:'8px 15px', border:'1px solid #ccc', background:'white', borderRadius: 6, cursor:'pointer' }}>← กลับ Dashboard</button>
@@ -181,7 +162,7 @@ export default function GalleryManager() {
                 <input type="text" value={newItem.title} onChange={e => setNewItem({...newItem, title: e.target.value})} style={{width:'100%', padding: 8, border:'1px solid #ddd', borderRadius:4}} />
             </div>
 
-            {/* --- ส่วนข้อมูลศิลปิน (ปรับใหม่) --- */}
+            {/* --- ข้อมูลศิลปิน --- */}
             <div style={{gridColumn: '1 / -1', background:'#f9f9f9', padding: 15, borderRadius: 8, display:'grid', gridTemplateColumns: '1fr 1fr', gap: 15}}>
                 <div style={{gridColumn:'1/-1', fontWeight:'bold', fontSize:'14px'}}>ข้อมูลศิลปิน</div>
                 
@@ -189,13 +170,17 @@ export default function GalleryManager() {
                     <label style={{display:'block', marginBottom: 5, fontSize:'12px'}}>ชื่อศิลปิน</label>
                     <input type="text" value={newItem.artist_name} onChange={e => setNewItem({...newItem, artist_name: e.target.value})} style={{width:'100%', padding: 8, border:'1px solid #ddd', borderRadius:4}} />
                 </div>
-                
                 <div>
-                    <label style={{display:'block', marginBottom: 5, fontSize:'12px'}}>รูปโปรไฟล์ศิลปิน (วงกลม)</label>
+                    <label style={{display:'block', marginBottom: 5, fontSize:'12px'}}>รูปโปรไฟล์ (วงกลม)</label>
                     <div style={{display:'flex', gap: 10, alignItems:'center'}}>
                         {newItem.artist_image_url && <img src={newItem.artist_image_url} style={{width: 40, height: 40, borderRadius:'50%', objectFit:'cover'}} />}
                         <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'artist_image_url')} style={{fontSize:'12px'}} disabled={uploading} />
                     </div>
+                </div>
+                {/* ✅ ช่องใส่ Social URL */}
+                <div style={{gridColumn:'1 / -1'}}>
+                    <label style={{display:'block', marginBottom: 5, fontSize:'12px'}}>Social Media URL (เช่น IG, FB)</label>
+                    <input type="text" value={newItem.artist_social_url} onChange={e => setNewItem({...newItem, artist_social_url: e.target.value})} placeholder="https://instagram.com/..." style={{width:'100%', padding: 8, border:'1px solid #ddd', borderRadius:4}} />
                 </div>
             </div>
 
@@ -204,11 +189,19 @@ export default function GalleryManager() {
                 <label style={{display:'block', marginBottom: 5, fontSize:'14px'}}>เทคนิค</label>
                 <input type="text" value={newItem.technique} onChange={e => setNewItem({...newItem, technique: e.target.value})} placeholder="เช่น สีน้ำมัน" style={{width:'100%', padding: 8, border:'1px solid #ddd', borderRadius:4}} />
             </div>
-
-            {/* ✅ เพิ่มช่องกรอกขนาด */}
             <div>
                 <label style={{display:'block', marginBottom: 5, fontSize:'14px'}}>ขนาดภาพ</label>
                 <input type="text" value={newItem.dimensions} onChange={e => setNewItem({...newItem, dimensions: e.target.value})} placeholder="เช่น 80 x 60 cm" style={{width:'100%', padding: 8, border:'1px solid #ddd', borderRadius:4}} />
+            </div>
+
+            {/* ✅ Dropdown เลือก Location */}
+            <div style={{gridColumn: '1 / -1'}}>
+                <label style={{display:'block', marginBottom: 5, fontSize:'14px'}}>📍 สถานที่จัดแสดง</label>
+                <select value={newItem.location} onChange={e => setNewItem({...newItem, location: e.target.value})} style={{width:'100%', padding: 8, border:'1px solid #ddd', borderRadius:4}}>
+                    <option value="โซนคาเฟ่ Indoor อาคารหลัก">🏠 โซนคาเฟ่ Indoor อาคารหลัก</option>
+                    <option value="โซนคาเฟ่ Indoor อาคาร Workshop">🖼️ อาคาร Art Gallery</option>
+                    <option value="โซน Outdoor">🌳 โซน Outdoor</option>
+                </select>
             </div>
 
             <div>
@@ -222,7 +215,6 @@ export default function GalleryManager() {
                 {newItem.image_url && <img src={newItem.image_url} style={{height: 100, marginTop: 10, borderRadius: 4}} />}
             </div>
 
-             {/* ... (Concept, Checkbox, Button เหมือนเดิม) ... */}
             <div style={{gridColumn: '1 / -1'}}>
                 <label style={{display:'block', marginBottom: 5, fontSize:'14px'}}>แนวความคิด (Concept)</label>
                 <textarea value={newItem.concept} onChange={e => setNewItem({...newItem, concept: e.target.value})} rows="3" style={{width:'100%', padding: 8, border:'1px solid #ddd', borderRadius:4}}></textarea>
@@ -252,9 +244,8 @@ export default function GalleryManager() {
             </div>
         </form>
       </div>
-
-      {/* List (เหมือนเดิม) */}
-      <div style={{display:'flex', flexDirection:'column', gap: 10}}>
+      {/* ... List ส่วนล่างเหมือนเดิม ... */}
+       <div style={{display:'flex', flexDirection:'column', gap: 10}}>
         {artworks.map(art => (
             <div key={art.id} style={{padding: 10, border:'1px solid #eee', background:'white', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
                 <div style={{display:'flex', gap: 10, alignItems:'center'}}>
