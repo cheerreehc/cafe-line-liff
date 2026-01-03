@@ -108,41 +108,41 @@ export default function ArtworkDetail() {
   if (!art) return <div style={{textAlign:'center', padding:50}}>Art Not Found</div>;
 
   return (
-    <div style={{ paddingBottom: 100, fontFamily: 'sans-serif', background:'black', minHeight:'100vh', color:'white' }}>
+    <div style={{ paddingBottom: 100, fontFamily: 'sans-serif', background:'white', minHeight:'100vh', color:'#333' }}>
       
-      {/* Hero Image */}
-      <div style={{width:'100%', height:'60vh', background:'#111', display:'flex', alignItems:'center', justifyContent:'center'}}>
-          <img src={art.image_url} style={{maxWidth:'100%', maxHeight:'100%', objectFit:'contain', boxShadow:'0 0 20px rgba(255,255,255,0.1)'}} />
+      {/* Hero Image (พื้นหลังเทาอ่อนๆ ให้รูปเด่น) */}
+      <div style={{width:'100%', height:'60vh', background:'#f5f5f5', display:'flex', alignItems:'center', justifyContent:'center'}}>
+          <img src={art.image_url} style={{maxWidth:'100%', maxHeight:'100%', objectFit:'contain', boxShadow:'0 5px 20px rgba(0,0,0,0.1)'}} />
       </div>
 
       {/* Details */}
       <div style={{padding: 20}}>
-          <h1 style={{fontSize:'24px', margin:'0 0 5px', fontFamily:'serif'}}>{art.title}</h1>
-          <p style={{color:'#aaa', margin:0, fontSize:'14px'}}>Artist: {art.artist_name}</p>
+          <h1 style={{fontSize:'24px', margin:'0 0 5px', fontFamily:'serif', color:'black'}}>{art.title}</h1>
+          <p style={{color:'#666', margin:0, fontSize:'14px'}}>Artist: {art.artist_name}</p>
           <p style={{color:'#888', fontSize:'12px', marginTop: 5}}>{art.technique}</p>
           
-          <div style={{margin:'20px 0', padding:'20px', background:'#222', borderRadius: 8, fontStyle:'italic', color:'#ccc', lineHeight: 1.6}}>
+          <div style={{margin:'20px 0', padding:'20px', background:'#f9f9f9', borderRadius: 8, fontStyle:'italic', color:'#555', lineHeight: 1.6, borderLeft:'4px solid #ddd'}}>
               "{art.concept}"
           </div>
 
           {/* Trust Badge */}
           <div style={{display:'flex', gap: 10, alignItems:'center', justifyContent:'center', marginBottom: 20, opacity: 0.7}}>
-              <span style={{border:'1px solid #555', padding:'4px 8px', borderRadius: 4, fontSize:'10px'}}>Verified by BaanSilpa</span>
-              <span style={{border:'1px solid #555', padding:'4px 8px', borderRadius: 4, fontSize:'10px'}}>Original Artwork</span>
+              <span style={{border:'1px solid #ddd', padding:'4px 8px', borderRadius: 4, fontSize:'10px', color:'#888'}}>Verified by BaanSilpa</span>
+              <span style={{border:'1px solid #ddd', padding:'4px 8px', borderRadius: 4, fontSize:'10px', color:'#888'}}>Original Artwork</span>
           </div>
       </div>
 
       {/* Action Bar (Fixed Bottom) */}
-      <div style={{position:'fixed', bottom:0, left:0, right:0, background:'#111', padding:'15px 20px', borderTop:'1px solid #333', display:'flex', gap: 10, alignItems:'center'}}>
+      <div style={{position:'fixed', bottom:0, left:0, right:0, background:'white', padding:'15px 20px', borderTop:'1px solid #eee', display:'flex', gap: 10, alignItems:'center', boxShadow:'0 -2px 10px rgba(0,0,0,0.05)'}}>
           
           <div style={{display:'flex', flexDirection:'column'}}>
               <span style={{fontSize:'12px', color:'#888'}}>ราคา</span>
-              <span style={{fontSize:'20px', fontWeight:'bold', color:'white'}}>{art.price.toLocaleString()}.-</span>
+              <span style={{fontSize:'20px', fontWeight:'bold', color:'black'}}>{art.price.toLocaleString()}.-</span>
           </div>
 
           <button 
             onClick={handleChat}
-            style={{marginLeft:'auto', background:'none', border:'1px solid white', color:'white', padding:'10px 15px', borderRadius: 30, cursor:'pointer'}}
+            style={{marginLeft:'auto', background:'white', border:'1px solid #ccc', color:'#333', padding:'10px 15px', borderRadius: 30, cursor:'pointer'}}
           >
              💬 ถาม
           </button>
@@ -151,12 +151,12 @@ export default function ArtworkDetail() {
               <button 
                 onClick={handleBuy}
                 disabled={processing}
-                style={{background:'white', color:'black', border:'none', padding:'12px 25px', borderRadius: 30, fontWeight:'bold', cursor:'pointer', opacity: processing ? 0.7 : 1}}
+                style={{background:'black', color:'white', border:'none', padding:'12px 25px', borderRadius: 30, fontWeight:'bold', cursor:'pointer', opacity: processing ? 0.7 : 1}}
               >
                  {processing ? 'Loading...' : 'ซื้อผลงาน'}
               </button>
           ) : (
-              <button disabled style={{background:'#333', color:'#888', border:'none', padding:'12px 25px', borderRadius: 30, cursor:'not-allowed'}}>
+              <button disabled style={{background:'#eee', color:'#999', border:'none', padding:'12px 25px', borderRadius: 30, cursor:'not-allowed'}}>
                  ขายแล้ว
               </button>
           )}
