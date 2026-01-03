@@ -55,16 +55,16 @@ export async function POST(request) {
             qrPromptPay: { isEnabled: true },
             
             // 2. บัตรเครดิต/เดบิต (Credit Card)
-            card: { isEnabled: true }, 
+            card: { isEnabled: false }, 
             
             // 3. แอปธนาคาร (KPlus, SCB Easy, etc.)
-            mobileBanking: { isEnabled: true },
+            mobileBanking: { isEnabled: false },
 
             // 4. ผ่อนชำระ (Installment) - ⭐ สำคัญมากสำหรับขายรูปภาพ
-            installment: { isEnabled: true },
+            installment: { isEnabled: false },
 
             // 5. กระเป๋าเงินออนไลน์ (TrueMoney, ShopeePay)
-            eWallet: { isEnabled: true }
+            eWallet: { isEnabled: false }
             
             // ❌ ไม่ใส่ buyNowPayLater เพื่อปิดการใช้งาน
             // buyNowPayLater: { isEnabled: false } 
